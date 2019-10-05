@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+
 
 
 import pandas as pd
@@ -10,7 +10,7 @@ import nltk
 #nltk.download('punkt')
 
 
-# In[2]:
+
 
 
 #Read data
@@ -19,20 +19,20 @@ movies_location = './dataset/movies.csv'
 movies = pd.read_csv(movies_location)
 
 
-# In[3]:
+
 
 
 movies.head(10)
 
 
-# In[4]:
+
 
 
 #Joining IMDB Plot and Wiki Plot
 movies['plot'] = movies['wiki_plot'].astype(str) +  "\n" + movies['imdb_plot'].astype(str)
 
 
-# In[5]:
+
 
 
 #defining tokenize and snowball stemming method
@@ -55,7 +55,7 @@ def token_and_stem(para):
     return stemmed
 
 
-# In[7]:
+
 
 
 sent_tokenized = [sent for sent in nltk.sent_tokenize("""
@@ -74,7 +74,7 @@ filtered = [word for word in words_tokenized if re.search('[a-zA-Z]', word)]
 filtered
 
 
-# In[8]:
+
 
 
 stemmer = SnowballStemmer("english")
@@ -83,7 +83,7 @@ stemmer = SnowballStemmer("english")
 print("Without stemming: ", filtered)
 
 
-# In[10]:
+
 
 
 stemmed_words = [stemmer.stem(word) for word in filtered]
@@ -91,7 +91,7 @@ stemmed_words = [stemmer.stem(word) for word in filtered]
 print("After stemming:   ", stemmed_words)
 
 
-# In[11]:
+
 
 
 #Creating TFIDFVectorizer
@@ -103,7 +103,7 @@ tfidf_vector = TfidfVectorizer(stop_words='english',
 plot_matrix = tfidf_vector.fit_transform([plot for plot in movies['plot']])
 
 
-# In[12]:
+
 
 
 #clustering with KMeans
@@ -121,7 +121,6 @@ clusters = k_means.labels_.tolist()
 movies["cluster"] = clusters
 
 
-# In[13]:
 
 
 #calculating similarity distance
@@ -131,11 +130,10 @@ from sklearn.metrics.pairwise import cosine_similarity
 sim_dis = 1 - cosine_similarity(plot_matrix)
 
 
-# In[14]:
+
 
 
 import matplotlib.pyplot as plt
-get_ipython().run_line_magic('matplotlib', 'inline')
 
 from scipy.cluster.hierarchy import linkage, dendrogram
 
@@ -155,10 +153,9 @@ fig.set_size_inches(108, 21)
 plt.show()
 
 
-# In[15]:
 
 
-#makind a dictionary that held the most similar movies based on the ordering of the movies_sim_dis_matrix
+#making a dictionary that held the most similar movies based on the ordering of the movies_sim_dis_matrix
 similar_movies = {}
 
 for movie in movies_sim_dis_matrix:
@@ -169,7 +166,6 @@ for movie in movies_sim_dis_matrix:
     
 
 
-# In[16]:
 
 
 #Generally we find that movies that are count as a similar value for an earlier value
@@ -185,24 +181,26 @@ for a in similar_movies:
     similar_for_rated.append(similar_movies[a])
 
 
-# In[19]:
+
 
 
 #predict method
 def show_most_similar_movie():
-    movie_title = input('Please Enter a movie title ').strip()    
+    movie_title = input('Please Enter a movie title ').strip() 
+    #making the movie_title input lower case and then converting every title to lower case for comparisons
     movies['title_lower'] = movies['title'].apply(lambda x: x.lower())
     
     
-    
+    #checking that the entered movie exists in dataset
     if any(movies['title_lower'] == movie_title.lower()):
         movie_df = movies[movies['title_lower'] == movie_title]
     else:
         return "Movie does not exist. Please check your spelling and Capitalisations"
     
-    
+    #converting the 'rank' of the movie according to the dataset; it acts as an id of sorts, to an integer
     rank = int(movie_df['rank'])
     
+    #checking if the rank appears in rated movies, if not converting then checking if it has been used as a similar movie so that we can get the most similar movie for any movie
     if rank in rated_movies:
     
         sim_movie_df = movies[movies['rank'] == similar_movies[rank]]
@@ -217,7 +215,7 @@ def show_most_similar_movie():
         sim_movie = sim_movie_df.title.values
         
         
-        
+     #this check here is used to enure that the similar movie exists
     if sim_movie.size > 0:
         sel = sim_movie[0]
     else:
@@ -227,8 +225,7 @@ def show_most_similar_movie():
         
 
 
-# In[20]:
 
 
-show_most_similar_movie()
-
+x = show_most_similar_movie()
+print(x)
